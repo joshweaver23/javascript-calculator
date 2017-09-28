@@ -1,0 +1,101 @@
+jQuery(document).ready(function($) {
+  const operators = {
+    "%": function(x, y) {return x % y},
+    "/": function(x, y) {return x / y},
+    "*": function(x, y) {return x * y},
+    "-": function(x, y) {return x - y},
+    "+": function(x, y) {return x + y}
+  };
+  let lastAns = "";
+  let currentAns = "";
+  //number and operator button clicks
+  let opFunction = function() {
+    let str = $("#output").html();
+    if ($("#output").hasClass("ans")) {
+      $("#output").removeClass("ans");
+      $("#output").html("");
+      if (/([^+\-*%\/])/g.test(str[str.length - 1])) {
+        $("#output").append($(this).html());
+      }
+      //if this entry is not a function, append this
+      else if (/([^+\-*%\/])/g.test($(this).html())) {
+        $("#output").append($(this).html());
+      }
+    }
+    //check if last entry was not a function, append anything
+    else if (/([^+\-*%\/])/g.test(str[str.length - 1])) {
+      $("#output").append($(this).html());
+    }
+    //if this entry is not a function, append this
+    else if (/([^+\-*%\/])/g.test($(this).html())) {
+      $("#output").append($(this).html());
+    }
+  }
+  $(".operator").click(opFunction)
+  //AC clear all function
+  let clearFunction = function() {
+    $("#output").html("");
+    $("#output").removeClass("ans");
+    lastAns = "";
+    currentAns = "";
+  }
+  $(".clear").click(clearFunction)
+  //CE clear last function
+  let backFunction = function() {
+    let str = $("#output").html();
+    str = str.substring(0, str.length - 1);
+    $("#output").html(str);
+  }
+  $(".back").click(backFunction)
+  //equals function
+  let equalsFunction = function() {
+    let data = $("#output").html().split(/([+\-*%\/])/g);
+    let decimalCount = 0;
+    //fix floating point issue only works for up to 6 decimal places
+    data.map(function(ea) {
+      let thisNum = Number(ea);
+      if (thisNum) {
+        let thisCount = (thisNum!=Math.floor(thisNum))?(thisNum.toString()).split('.')[1].length:0;
+        thisCount > decimalCount ? decimalCount = thisCount : decimalCount = decimalCount;
+      }      
+    })
+    data.map(function(e, i) {
+      if (i === 0 && /([^+\-*%\/])/g.test(data[i])) {
+        currentAns = Number(e);
+      }
+      else if (currentAns === "") {
+        currentAns = Number(e);
+      }
+      else if (/([+\-*%\/])/g.test(e)) {
+        currentAns = operators[e](Number(currentAns), Number(data[i+1]));
+      }
+    })
+    $("#output").html(currentAns.toFixed(decimalCount));
+    $("#output").addClass("ans");
+    lastAns = currentAns;
+  }
+  $(".equals").click(equalsFunction)
+  //call-ans function
+  let callAnsFunction = function() {
+    let str = $("#output").html();
+    if (/([+\-*%\/])/g.test(str[str.length - 1])) {
+      $("#output").append(lastAns);
+    }
+  }
+  $(".call-ans").click(callAnsFunction)
+  //decimals
+  let decimalFunction = function() {
+    let curOperation = $("#output").html().split(/([+\-*%\/])/g);
+    let curNumber = curOperation[curOperation.length-1];
+    if (!/([.])/g.test(curNumber)) {
+      $("#output").append(".");
+    }
+  }
+  $(".decimal").click(decimalFunction)
+  
+  //handle keypresses
+  // $(document).keyup(function(e) {
+  //   let key = String.fromCharCode(e.which);
+  //   console.log(key);
+  // })
+});
